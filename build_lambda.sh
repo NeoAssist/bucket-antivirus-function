@@ -21,8 +21,9 @@ set -e
 yum update -y
 yum install -y cpio python2-pip yum-utils zip
 yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-pip install --no-cache-dir virtualenv
-virtualenv env
+# This had --no-cache-dir, tracing through multiple tickets led to a problem in wheel
+pip install -r requirements.txt
+rm -rf /root/.cache/pipvirtualenv env
 . env/bin/activate
 pip install --no-cache-dir -r requirements.txt
 
@@ -37,6 +38,7 @@ popd
 mkdir -p bin
 cp /tmp/usr/bin/clamscan /tmp/usr/bin/freshclam /tmp/usr/lib64/* bin/.
 echo "DatabaseMirror database.clamav.net" > bin/freshclam.conf
+echo "CompressLocalDatabase yes" >> bin/freshclam.conf
 
 mkdir -p build
 zip -r9 $lambda_output_file *.py bin
